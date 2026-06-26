@@ -22,3 +22,15 @@ output/
 ~$*
 *.lock
 
+# Local development files and notebooks (unnecessary for grading)
+Thể lệ HackAIthon 2026.pdf
+public-test_1780368312.json
+solve_test_vllm_interactive.ipynb
+test-qwen3-5-4b.ipynb
+solve_test_vllm_offline.py
+submission_final.csv
+run_docker_test.sh
+client_server/
+rag_archive/
+scratch/
+
