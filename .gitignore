@@ -1,0 +1,24 @@
+# Caches and temporary files
+.cache/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Large model weights and files
+*.gguf
+models/
+Qwen_Qwen3.5-2B-Q4_K_M.gguf
+
+# Mock directories
+data_mock/
+output_mock/
+data/
+output/
+
+# Temp logs
+*.log
+
+# Microsoft Word temporary files
+~$*
+*.lock
+

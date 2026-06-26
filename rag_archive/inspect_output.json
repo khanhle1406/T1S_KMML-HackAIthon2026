@@ -1,0 +1,302 @@
+[
+  {
+    "qid": "test_0001",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: [1] Tiêu đề: Ném đá Nội dung: Thạch hình là một phương pháp tử h",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0002",
+    "is_rag": false,
+    "question_prefix": "Nếu bảng cầu của một sản phẩm cho thấy tại mức giá 5 đô la, lượng cầu là 150 đơn",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0003",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: Tiêu đề: Friedrich Wilhelm I của Phổ Nội dung: Friedrich Wilhelm",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0004",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: Title: Trận Höchstädt lần thứ hai Content: Trận Höchstädt hay cò",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0005",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: [1] Tiêu đề: Yaroslav. Một ngàn năm trước Nội dung: Yaroslav. Mộ",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0006",
+    "is_rag": false,
+    "question_prefix": "Xét một phản ứng hóa học trong đó nồng độ của chất phản ứng $ B $ giảm theo thời",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0007",
+    "is_rag": true,
+    "question_prefix": "Một trong các biểu hiện của biến đổi khí hậu là gì?",
+    "context_preview": "Tiêu đề: Biến đổi khí hậu đột ngột Nội dung: Các điểm tới hạn trong hệ thống khí hậu bao gồm các tác động cục bộ của biến đổi khí hậu, một số có thể k"
+  },
+  {
+    "qid": "test_0008",
+    "is_rag": false,
+    "question_prefix": "Trong một năm nhất định, GDP danh nghĩa của một quốc gia là 500 tỷ USD và GDP th",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0009",
+    "is_rag": false,
+    "question_prefix": "Một bể chứa hình trụ đang được đổ đầy nước với tốc độ không đổi là 50 centimet k",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0010",
+    "is_rag": true,
+    "question_prefix": "Giải pháp nào sau đây được đề xuất để xử lý lỗi xác thực khi nộp hồ sơ thẩm duyệ",
+    "context_preview": "Tiêu đề: Phòng cháy chữa cháy Nội dung: Căn cứ theo các văn bản pháp luật hiện hành, cần tiến hành công tác thẩm duyệt thiết kế phòng cháy chữa cháy ("
+  },
+  {
+    "qid": "test_0011",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: [1] Tiêu đề: Bộ Sả Nội dung: Bộ Sả (danh pháp khoa học: Coraciif",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0012",
+    "is_rag": true,
+    "question_prefix": "Khoa học gia nào trong số những người sau đây đã đóng vai trò quan trọng nhưng t",
+    "context_preview": "Tiêu đề: Phần mềm Nội dung: Nhiều lỗi được phát hiện và loại bỏ (gỡ lỗi) thông qua kiểm tra phần mềm. Tuy nhiên, việc kiểm thử phần mềm hiếm khi được "
+  },
+  {
+    "qid": "test_0013",
+    "is_rag": false,
+    "question_prefix": "Một bể hình trụ đang được đổ đầy nước với tốc độ không đổi là 20 cm³/s. Bán kính",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0014",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: [1] Tiêu đề: Arles, Các đài kỷ niệm Romanesque và La Mã Nội dung",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0015",
+    "is_rag": true,
+    "question_prefix": "Bạn nên làm gì nếu muốn có danh thiếp từ một người chưa từng đưa danh thiếp?",
+    "context_preview": "Tiêu đề: Danh thiếp Nội dung: In danh thiếp là một công việc trước tiên của các cá nhân doanh nghiệp khi kinh doanh chuyên nghiệp. Bởi card visit rất "
+  },
+  {
+    "qid": "test_0016",
+    "is_rag": false,
+    "question_prefix": "Xét các phản ứng sau: 1. $ \\text{X} \\rightarrow \\text{Y} $ với $ \\Delta H_1 $ 2.",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0017",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: Setter Setter là một giống chó săn thể thao chuyên dùng vào mục ",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0018",
+    "is_rag": true,
+    "question_prefix": "Giành quyền lực chính trị được hiểu là:",
+    "context_preview": "Tiêu đề: Quyền lực Nội dung: Với cách hiểu nguồn gốc quyền lực từ góc độ pháp luật, chính trị có thể phân loại quyền lực thành bốn nhóm: Phương thức g"
+  },
+  {
+    "qid": "test_0019",
+    "is_rag": false,
+    "question_prefix": "Phương pháp nào hiệu quả nhất để pháp nhân thương mại tiếp tục hoạt động khi đã ",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0020",
+    "is_rag": false,
+    "question_prefix": "Xét một dãy các biến ngẫu nhiên độc lập và có cùng phân phối $ X_1, X_2, \\ldots,",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0021",
+    "is_rag": false,
+    "question_prefix": "Một điện trở có điện trở $ R $ được nối với nguồn điện áp $ V $. Dòng điện chạy ",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0022",
+    "is_rag": true,
+    "question_prefix": "Khi đổi căn cước do thay đổi địa chỉ đăng ký thường trú tại tỉnh Cà Mau, người d",
+    "context_preview": "Tiêu đề: Căn cước công dân Nội dung: cũng sẽ bỏ việc yêu cầu người dân phải xuất trình sổ hộ khẩu, chứng minh nhân dân. Trong một số tờ khai về lý lịc"
+  },
+  {
+    "qid": "test_0023",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: -- Đoạn văn 1 -- Tiêu đề: Giao phối lựa chọn Nội dung: Giao phối",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0024",
+    "is_rag": false,
+    "question_prefix": "Làm thế nào để chủ trì, tham mưu ban hành văn bản có nội dung trái quy định của ",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0025",
+    "is_rag": false,
+    "question_prefix": "Khối lượng dung dịch NaOH 10% cần để trung hoà 200 ml dung dịch HCl 1M là:",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0026",
+    "is_rag": true,
+    "question_prefix": "Câu hỏi nào sau đây đúng về tần suất tính lãi kép?",
+    "context_preview": "Tiêu đề: Lý thuyết ứng đáp câu hỏi Nội dung: Chúng ta sẽ bắt đầu bằng cách xây dựng một hàm đáp ứng CH cho một CH nhị phân, tức là CH mà câu trả lời c"
+  },
+  {
+    "qid": "test_0027",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: Nhiễm trùng Nhiễm trùng (infection) là sự xâm nhập của mầm bệnh ",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0028",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: [1] Tiêu đề: Amnesiac Nội dung: Amnesiac là album phòng thu thứ ",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0029",
+    "is_rag": true,
+    "question_prefix": "Giáo dục đóng vai trò:",
+    "context_preview": "Tiêu đề: Chương trình giáo dục phổ thông 2018 Nội dung: Vai trò, mục tiêu và tư tưởng của chương trình giáo dục phổ thông mới. Vai trò. Theo Bộ Giáo d"
+  },
+  {
+    "qid": "test_0030",
+    "is_rag": true,
+    "question_prefix": "Người đầu tiên truyền thừa tại chùa An Phú là ai?",
+    "context_preview": "Tiêu đề: Hoàng Trọng Thừa Nội dung: Tháng 9, 1921, nhà truyền giáo D. I. Jeffrey thành lập Trường Kinh Thánh Đà Nẵng với mục tiêu \"dạy các khóa sinh m"
+  },
+  {
+    "qid": "test_0031",
+    "is_rag": false,
+    "question_prefix": "Giả sử $ x $ và $ y $ là các số nguyên sao cho $ x \\equiv 2 \\pmod{5} $ và $ y \\e",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0032",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: -- Document 1 -- Title: Hà Nội Content: Nhiệt độ trung bình mùa ",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0033",
+    "is_rag": true,
+    "question_prefix": "Nhiệm vụ nào sau đây KHÔNG thuộc khoa học xã hội?",
+    "context_preview": "Tiêu đề: Ủy ban Thường vụ Quốc hội Nội dung: Nhiệm kỳ của Ủy ban Thường vụ Quốc hội theo nhiệm kỳ của Quốc hội. Khi Quốc hội hết nhiệm kỳ, Ủy ban Thườ"
+  },
+  {
+    "qid": "test_0034",
+    "is_rag": false,
+    "question_prefix": "Một doanh nghiệp trong thị trường cạnh tranh có hàm tổng chi phí (TC) được cho b",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0035",
+    "is_rag": true,
+    "question_prefix": "Chọn phương án đúng trả lời cho câu hỏi sau: Cách mạng giải phóng dân tộc trong ",
+    "context_preview": "Tiêu đề: Trận Chơn Thành Nội dung: Đúng 22 giờ, 1 tháng 4 năm 1975 Bộ tư lệnh Quân đoàn 4 thông báo: “Địch ở Chơn Thành bỏ chạy, Sư đoàn 9 đang truy k"
+  },
+  {
+    "qid": "test_0036",
+    "is_rag": false,
+    "question_prefix": "Xét hàm số $ g(x) = 2x^2 - 3x + 1 $. Nếu chúng ta thực hiện phép biến đổi $ x \\t",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0037",
+    "is_rag": false,
+    "question_prefix": "Một chiếc tàu vũ trụ đang di chuyển với tốc độ $ v = 0.6c $, trong đó $ c $ là t",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0038",
+    "is_rag": true,
+    "question_prefix": "Theo Luật Bảo vệ môi trường 2020 thì có bao nhiêu nguyên tắc bảo vệ môi trường?",
+    "context_preview": "Tiêu đề: Hành vi vi phạm môi trường Nội dung: Việc thực thi hiệu quả các luật môi trường vô cùng quan trọng đối với bất kỳ chế độ bảo vệ nào được lập "
+  },
+  {
+    "qid": "test_0039",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: -- Đoạn văn 1 -- Tiêu đề: Nội dung: Tổ chức Hiệp ước Bắc Đại Tây",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0040",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: Tiêu đề: Ali Hassan al-Majid Nội dung: Ali Hassan al-Majid (tiến",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0041",
+    "is_rag": false,
+    "question_prefix": "Theo Tư tưởng Hồ Chí Minh, lực lượng cách mạng chủ yếu được hình thành từ đâu?",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0042",
+    "is_rag": false,
+    "question_prefix": "Một doanh nghiệp có hàm sản xuất Q = 2K^0.5L^0.5 và đang sản xuất tại điểm A (4,",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0043",
+    "is_rag": false,
+    "question_prefix": "Một nhà nghiên cứu đang kiểm định giả thuyết không $ H_0: \\mu = 50 $ đối với giả",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0044",
+    "is_rag": true,
+    "question_prefix": "Yếu tố nào là cốt lõi giúp công nghiệp văn hóa tạo ra giá trị kinh tế?",
+    "context_preview": "Tiêu đề: Tự tin vào năng lực bản thân Nội dung: Hơn nữa, tự tin vào năng lực bản thân đã được đưa vào như một trong bốn yếu tố tự đánh giá cốt lõi, đá"
+  },
+  {
+    "qid": "test_0045",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: Nguyễn Bảo Trị Nguyễn Bảo Trị (sinh năm 1929) nguyên là tướng lĩ",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0046",
+    "is_rag": true,
+    "question_prefix": "Nguyễn Ái Quốc đã mở nhiều lớp huấn luyện đào tạo cán bộ cho cách mạng Việt Nam ",
+    "context_preview": "Tiêu đề: Nguyễn Thiệu Nội dung: Nguyễn Thiệu (1903-1989) một trong hai đại biểu đại diện An Nam Cộng sản Đảng tham dự Hội nghị thành lập Đảng Cộng sản"
+  },
+  {
+    "qid": "test_0047",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: Granny Smith Granny Smith hay còn được gọi là táo xanh hay táo c",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0048",
+    "is_rag": false,
+    "question_prefix": "Nguồn gốc nào sau đây đã ảnh hưởng sâu sắc đến tư tưởng Chủ Tịch Hồ Chí Minh, gó",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0049",
+    "is_rag": false,
+    "question_prefix": "Đoạn thông tin: Title: Vũ khí hủy diệt hàng loạt Content: Vũ khí hủy diệt hàng l",
+    "context_preview": ""
+  },
+  {
+    "qid": "test_0050",
+    "is_rag": false,
+    "question_prefix": "Một công ty có các số dư tài khoản sau đến hết năm: Tài sản 250.000 USD, Nợ 70.0",
+    "context_preview": ""
+  }
+]
