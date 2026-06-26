@@ -36,20 +36,7 @@ docker run --gpus all \
 
 ---
 
-## 2. Hướng dẫn tự Build Docker Image (Tùy chọn)
-
-Nếu Ban Giám Khảo muốn tự đóng gói lại mã nguồn từ repository này:
-
-1. Đặt weights của mô hình vào thư mục `models/Qwen3.5-4B-AWQ-4bit/` (nếu chạy hoàn toàn offline).
-2. Tiến hành build Docker Image:
-   ```bash
-   docker build -t t1s_kmml_innovator:latest .
-   ```
-3. Chạy container tương tự Bước 3 ở trên (thay thế tên image bằng `t1s_kmml_innovator:latest`).
-
----
-
-## 3. Cấu trúc mã nguồn trong Repository
+## 2. Cấu trúc mã nguồn trong Repository
 * **Dockerfile**: Đóng gói môi trường vLLM offline và các thư viện hỗ trợ.
 * **entrypoint_solver.py**: Script điều phối suy luận bất đồng bộ gối đầu, tự động bóc tách regex phân biệt hoa-thường và biểu quyết tự đồng thuận (`N_VOTES=3`).
 * **T1S_KMML_Thuyet_minh_Innovator.docx**: Tài liệu thuyết minh giải pháp gửi Ban Giám Khảo.
