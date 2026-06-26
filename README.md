@@ -10,7 +10,7 @@ Theo thể lệ cuộc thi, các tệp tin và thông tin bắt buộc phải ch
 
 1. **Docker Image (Đẩy lên Docker Hub)**: Đường dẫn Docker Hub chứa image đã được build.
 2. **Mã nguồn (GitHub Repository)**: Chứa toàn bộ mã nguồn, cấu hình Docker và hướng dẫn chạy tái lập kết quả.
-3. **Tài liệu thuyết minh phương pháp**: Tệp tin thuyết minh các chiến lược tối ưu mô hình, tham khảo tại [K1S_KMML_Thuyet_minh_Innovator.docx](file:///Users/xuannguyen/Desktop/Hackaithon/K1S_KMML_Thuyet_minh_Innovator.docx).
+3. **Tài liệu thuyết minh phương pháp**: Tệp tin thuyết minh các chiến lược tối ưu mô hình, tham khảo tại [T1S_KMML_Thuyet_minh_Innovator.docx](file:///Users/xuannguyen/Desktop/Hackaithon/T1S_KMML_Thuyet_minh_Innovator.docx).
 
 ---
 
@@ -68,7 +68,7 @@ docker run --gpus all \
 
 * [entrypoint_solver.py](file:///Users/xuannguyen/Desktop/Hackaithon/entrypoint_solver.py): Script suy luận chính chạy trong Docker container sử dụng `LLMEngine` offline và biểu quyết `N_VOTES=3` (nhiệt độ `0.2`).
 * [Dockerfile](file:///Users/xuannguyen/Desktop/Hackaithon/Dockerfile): Cấu hình môi trường Docker đóng gói mô hình và các thư viện cần thiết.
-* [K1S_KMML_Thuyet_minh_Innovator.docx](file:///Users/xuannguyen/Desktop/Hackaithon/K1S_KMML_Thuyet_minh_Innovator.docx): Tài liệu thuyết minh phương pháp tối ưu hóa độ chính xác và tốc độ thực thi.
+* [T1S_KMML_Thuyet_minh_Innovator.docx](file:///Users/xuannguyen/Desktop/Hackaithon/T1S_KMML_Thuyet_minh_Innovator.docx): Tài liệu thuyết minh phương pháp tối ưu hóa độ chính xác và tốc độ thực thi.
 * [solve_test_vllm_offline.py](file:///Users/xuannguyen/Desktop/Hackaithon/solve_test_vllm_offline.py): Script chạy thử nghiệm offline trên máy chủ (chứa bộ dữ liệu Ground Truth để test nhanh độ chính xác).
 * [run_docker_test.sh](file:///Users/xuannguyen/Desktop/Hackaithon/run_docker_test.sh): Script shell hỗ trợ chạy nhanh container thử nghiệm.
 * `models/Qwen3.5-4B-AWQ-4bit/`: Thư mục chứa weights mô hình gốc để chạy hoàn toàn offline (cần được đặt trong cùng thư mục khi thực hiện build Docker).
