@@ -1,27 +1,39 @@
-FROM vllm/vllm-openai:v0.6.3
+# BASE IMAGE
+# Sử dụng phiên bản CUDA 12.2 và Ubuntu 22.04 để tương thích với Server BTC và có sẵn Python 3.10+
+FROM nvidia/cuda:12.2.0-devel-ubuntu22.04
 
-# Nâng cấp thư viện transformers và vllm để đồng bộ với môi trường chạy và hỗ trợ kiến trúc mô hình qwen3_5
-RUN pip install --no-cache-dir vllm==0.23.0 transformers==5.12.1
+# SYSTEM DEPENDENCIES
+# Cài đặt Python, Pip và các gói hệ thống cần thiết
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-# Thiết lập thư mục làm việc trong container
-WORKDIR /app
+# Link python3 thành python
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
-# Sao chép weights của mô hình từ thư mục cục bộ vào container để chạy hoàn toàn offline
-COPY models/Qwen3.5-4B-AWQ-4bit /app/models/Qwen3.5-4B-AWQ-4bit
+# PROJECT SETUP
+# Thiết lập thư mục làm việc theo yêu cầu BTC
+WORKDIR /code
 
-# Sao chép script giải đề thi vào container
-COPY entrypoint_solver.py /app/entrypoint_solver.py
+# Sao chép toàn bộ source code (và mô hình nếu có) vào trong container
+COPY . /code
 
-# Đảm bảo các thư mục /data và /output tồn tại trong container
-RUN mkdir -p /data /output
+# Cài đặt các thư viện từ requirements.txt
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir -r requirements.txt
 
-# Chạy bằng user root hoặc có quyền ghi vào /output
-USER root
+# Tạo các thư mục data và output và phân quyền ghi (để tương thích ngược với các kiểm thử khác)
+RUN mkdir -p /data /output && chmod 777 /data /output
 
-# Khai báo biến môi trường cho PyTorch và vLLM
+# Khai báo các biến môi trường cần thiết
 ENV PYTHONUNBUFFERED=1
 ENV VLLM_USE_FLASHINFER_SAMPLER=0
 ENV VLLM_ATTENTION_BACKEND=FLASH_ATTN
 
-# Thiết lập entrypoint chạy trực tiếp script giải đề thi khi container khởi động
-ENTRYPOINT ["python3", "/app/entrypoint_solver.py"]
+# Chạy bằng user root hoặc có quyền ghi
+USER root
+
+# Lệnh chạy mặc định khi container khởi động theo yêu cầu BTC
+CMD ["bash", "inference.sh"]

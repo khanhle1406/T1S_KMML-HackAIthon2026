@@ -10,7 +10,11 @@ from vllm import EngineArgs, LLMEngine, SamplingParams
 from vllm.sampling_params import RequestOutputKind
 
 # ========== CẤU HÌNH MẶC ĐỊNH ==========
-MODEL_PATH = "/app/models/Qwen3.5-4B-AWQ-4bit"
+MODEL_PATH = "/code/models/Qwen3.5-4B-AWQ-4bit"
+if not os.path.exists(MODEL_PATH):
+    # Fallback cho các môi trường chạy khác
+    MODEL_PATH = "/app/models/Qwen3.5-4B-AWQ-4bit"
+
 LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 SYSTEM_REASONING = """Bạn là chuyên gia giải đề thi trắc nghiệm đa ngành. Hãy suy luận từng bước một cách cẩn thận nhưng ngắn gọn (dưới 250 từ), đi thẳng vào bản chất vấn đề để tìm đáp án đúng.
 
@@ -114,17 +118,28 @@ def extract_letter(text, choices_count):
                 
     return "A"
 
-def find_input_file(data_dir="/data"):
-    """Tìm file kiểm thử đầu vào tại thư mục chỉ định."""
-    files = os.listdir(data_dir)
-    # Ưu tiên private_test, public_test định dạng csv hoặc json
-    for f in ["private_test.csv", "public_test.csv", "private_test.json", "public_test.json"]:
-        if f in files:
-            return os.path.join(data_dir, f)
-    for f in files:
-        if f.endswith(".csv") or f.endswith(".json"):
-            return os.path.join(data_dir, f)
-    raise FileNotFoundError(f"Không tìm thấy file test (.csv hoặc .json) trong {data_dir}!")
+def find_input_file():
+    """Tìm file kiểm thử đầu vào tại thư mục chỉ định, ưu tiên tuyệt đối /code/private_test.json."""
+    # 1. Ưu tiên tuyệt đối file /code/private_test.json theo yêu cầu của BTC
+    if os.path.exists("/code/private_test.json"):
+        return "/code/private_test.json"
+    if os.path.exists("/code/private_test.csv"):
+        return "/code/private_test.csv"
+        
+    # 2. Fallback tìm kiếm trong các thư mục khác để tương thích với test local
+    for search_dir in ["/data", "/app/data", "./data", "./data_mock"]:
+        if os.path.exists(search_dir):
+            try:
+                files = os.listdir(search_dir)
+                for f in ["private_test.json", "private_test.csv", "public_test.json", "public_test.csv"]:
+                    if f in files:
+                        return os.path.join(search_dir, f)
+                for f in files:
+                    if f.endswith(".json") or f.endswith(".csv"):
+                        return os.path.join(search_dir, f)
+            except Exception:
+                pass
+    raise FileNotFoundError("Không tìm thấy file test (.json hoặc .csv)!")
 
 def load_test_data(filepath):
     """Đọc dữ liệu cực kỳ linh hoạt (hỗ trợ cả JSON và CSV nhiều định dạng)."""
@@ -191,16 +206,21 @@ def main():
     
     # 1. Tìm và nạp file test
     try:
-        input_filepath = find_input_file("/data")
+        input_filepath = find_input_file()
         print(f"📂 Tìm thấy file kiểm thử: {input_filepath}")
         test_data = load_test_data(input_filepath)
         print(f"📊 Đã nạp thành công {len(test_data)} câu hỏi từ file test.")
     except Exception as e:
         print(f"❌ Lỗi đọc dữ liệu đầu vào: {e}")
         # Ghi file rỗng hoặc lỗi và thoát
-        os.makedirs("/output", exist_ok=True)
-        with open("/output/pred.csv", "w", encoding="utf-8") as f_err:
+        with open("submission.csv", "w", encoding="utf-8") as f_err:
             f_err.write("qid,answer\n")
+        with open("submission_time.csv", "w", encoding="utf-8") as f_err_t:
+            f_err_t.write("qid,answer,time\n")
+        if os.path.exists("/output"):
+            with open("/output/submission.csv", "w") as f_err: f_err.write("qid,answer\n")
+            with open("/output/pred.csv", "w") as f_err: f_err.write("qid,answer\n")
+            with open("/output/submission_time.csv", "w") as f_err_t: f_err_t.write("qid,answer,time\n")
         return
 
     # 2. Nhận diện phần cứng GPU và tối ưu hóa EngineArgs động
@@ -238,7 +258,7 @@ def main():
             # Tự động chọn KV Cache (dùng auto để tương thích với FLASH_ATTN và đạt độ chính xác cao nhất)
             device_capability = torch.cuda.get_device_capability(0)
             kv_cache_dtype = "auto"
-            print(f"⚡ GPU Compute Capability {device_capability[0]}.{device_capability[1]}. Dùng auto KV Cache (bằng kiểu dữ liệu mô hình để tối ưu hóa độ chính xác).")
+            print(f"⚡ GPU Compute Capability {device_capability[0]}.{device_capability[1]}. Dùng auto KV Cache.")
             print(f"⚙️ Auto-configured: gpu_memory_utilization={gpu_mem_util}, max_model_len={max_model_len}, max_num_seqs={max_num_seqs}")
     except Exception as e:
         print(f"⚠️ GPU auto-config failed: {e}. Sử dụng cấu hình mặc định.")
@@ -261,9 +281,14 @@ def main():
     engine = LLMEngine.from_engine_args(engine_args)
     print(f"✅ Đã tải xong Model và khởi tạo LLMEngine trong {time.time() - t_load_start:.2f} giây!")
 
-    # 4. Chuẩn bị prompts
-    prompts_step1 = []
-    for item in test_data:
+    # 4. Vòng lặp chạy từng câu hỏi một (sequential loop) theo yêu cầu BTC để đo inference time chính xác
+    t_inference_start = time.time()
+    predictions = []
+
+    for q_idx, item in enumerate(test_data):
+        start_time_sample = time.time()
+        
+        # Chuẩn bị prompt
         choices_text = "\n".join([f"{LETTERS[i]}. {choice}" for i, choice in enumerate(item["choices"])])
         user_prompt = f"Câu hỏi:\n{item['question']}\n\nLựa chọn:\n{choices_text}\n\nNhiệm vụ: Chọn đúng 1 đáp án."
         
@@ -273,13 +298,8 @@ def main():
         ]
         prompt = apply_chat_template_qwen(messages, add_generation_prompt=True)
         prompt += "Suy luận:\n"
-        prompts_step1.append(prompt)
-
-    # 5. Sinh luồng suy luận đồng thời
-    t_inference_start = time.time()
-    
-    # Đẩy toàn bộ câu hỏi vào hàng đợi xử lý song song của engine
-    for q_idx, prompt in enumerate(prompts_step1):
+        
+        # Thêm N_VOTES yêu cầu song song của câu hỏi này vào engine
         est_tokens = len(prompt) // 3
         max_reasoning_tokens = max(100, 4096 - est_tokens - 50)
         max_reasoning_tokens = min(800, max_reasoning_tokens)
@@ -297,92 +317,110 @@ def main():
                     output_kind=RequestOutputKind.FINAL_ONLY
                 )
             )
-
-    votes_dict = {i: [None] * N_VOTES for i in range(len(test_data))}
-    reasonings_dict = {i: [None] * N_VOTES for i in range(len(test_data))}
-
-    # Vòng lặp sự kiện bất đồng bộ điều phối Step 1 và Step 2
-    while engine.has_unfinished_requests():
-        request_outputs = engine.step()
+            
+        votes = [None] * N_VOTES
+        reasonings = [None] * N_VOTES
         
-        for request_output in request_outputs:
-            if request_output.finished:
-                req_id = request_output.request_id
-                
-                # Xử lý Step 1
-                if req_id.startswith("q_"):
+        # Chạy engine cho đến khi hoàn thành các yêu cầu của câu hỏi hiện tại
+        while engine.has_unfinished_requests():
+            request_outputs = engine.step()
+            for request_output in request_outputs:
+                if request_output.finished:
+                    req_id = request_output.request_id
                     parts = req_id.split("_")
-                    q_idx = int(parts[1])
                     path_idx = int(parts[2])
-                    choices_count = len(test_data[q_idx]["choices"])
+                    choices_count = len(item["choices"])
                     
-                    reasoning_text = request_output.outputs[0].text
-                    reasonings_dict[q_idx][path_idx] = reasoning_text
-                    
-                    ans = extract_answer_from_completed(reasoning_text, choices_count)
-                    if ans:
-                        votes_dict[q_idx][path_idx] = ans
-                    else:
-                        # Bị cắt cụt -> Đẩy ngay Step 2 vào hàng đợi gối đầu
-                        prompt_base = prompts_step1[q_idx] + "\n\nChốt lại, đáp án đúng là chữ cái:"
-                        est_base_tokens = len(prompt_base) // 3
-                        max_reasoning_budget_tokens = 4096 - est_base_tokens - 10
-                        if max_reasoning_budget_tokens < 100:
-                            max_reasoning_budget_tokens = 100
-                        
-                        max_reasoning_budget_chars = max_reasoning_budget_tokens * 3
-                        if len(reasoning_text) > max_reasoning_budget_chars:
-                            truncated_reasoning = reasoning_text[-max_reasoning_budget_chars:]
+                    if req_id.startswith("q_"):
+                        reasoning_text = request_output.outputs[0].text
+                        reasonings[path_idx] = reasoning_text
+                        ans = extract_answer_from_completed(reasoning_text, choices_count)
+                        if ans:
+                            votes[path_idx] = ans
                         else:
-                            truncated_reasoning = reasoning_text
+                            # Bị cắt cụt -> Fallback sang Step 2
+                            prompt_base = prompt + f"{reasoning_text}\n\nChốt lại, đáp án đúng là chữ cái:"
+                            est_base_tokens = len(prompt_base) // 3
+                            max_reasoning_budget_tokens = 4096 - est_base_tokens - 10
+                            if max_reasoning_budget_tokens < 100:
+                                max_reasoning_budget_tokens = 100
                             
-                        prompt_step2 = prompts_step1[q_idx] + f"{truncated_reasoning}\n\nChốt lại, đáp án đúng là chữ cái:"
-                        
-                        step2_req_id = f"s2_{q_idx}_{path_idx}"
-                        engine.add_request(
-                            request_id=step2_req_id,
-                            prompt=prompt_step2,
-                            params=SamplingParams(
-                                temperature=0.0,
-                                max_tokens=15,
-                                repetition_penalty=1.10,
-                                stop=["[DONE]"],
-                                output_kind=RequestOutputKind.FINAL_ONLY
+                            max_reasoning_budget_chars = max_reasoning_budget_tokens * 3
+                            if len(reasoning_text) > max_reasoning_budget_chars:
+                                truncated_reasoning = reasoning_text[-max_reasoning_budget_chars:]
+                            else:
+                                truncated_reasoning = reasoning_text
+                                
+                            prompt_step2 = prompt + f"{truncated_reasoning}\n\nChốt lại, đáp án đúng là chữ cái:"
+                            
+                            step2_req_id = f"s2_{q_idx}_{path_idx}"
+                            engine.add_request(
+                                request_id=step2_req_id,
+                                prompt=prompt_step2,
+                                params=SamplingParams(
+                                    temperature=0.0,
+                                    max_tokens=15,
+                                    repetition_penalty=1.10,
+                                    stop=["[DONE]"],
+                                    output_kind=RequestOutputKind.FINAL_ONLY
+                                )
                             )
-                        )
-                
-                # Xử lý Step 2 (Fallback)
-                elif req_id.startswith("s2_"):
-                    parts = req_id.split("_")
-                    q_idx = int(parts[1])
-                    path_idx = int(parts[2])
-                    choices_count = len(test_data[q_idx]["choices"])
-                    
-                    raw_ans = request_output.outputs[0].text
-                    ans = extract_letter(raw_ans, choices_count)
-                    ans = normalize_prediction(ans, test_data[q_idx])
-                    votes_dict[q_idx][path_idx] = ans
+                    elif req_id.startswith("s2_"):
+                        raw_ans = request_output.outputs[0].text
+                        ans = extract_letter(raw_ans, choices_count)
+                        ans = normalize_prediction(ans, item)
+                        votes[path_idx] = ans
+        
+        # Biểu quyết lấy ý kiến số đông
+        vote_counts = Counter(votes)
+        selected_ans = vote_counts.most_common(1)[0][0]
+        
+        end_time_sample = time.time()
+        time_infer_sample = end_time_sample - start_time_sample
+        
+        # Lưu kết quả
+        predictions.append({
+            "qid": item["qid"],
+            "answer": selected_ans,
+            "time": time_infer_sample
+        })
+        
+        if (q_idx + 1) % 10 == 0 or (q_idx + 1) == len(test_data):
+            print(f"⏳ Đã xử lý {q_idx + 1}/{len(test_data)} câu. (Thời gian câu vừa rồi: {time_infer_sample:.3f}s)")
 
     t_inference_duration = time.time() - t_inference_start
-    print(f"✅ Đã hoàn thành suy luận trong {t_inference_duration:.2f} giây! (Trung bình: {t_inference_duration/len(test_data):.2f} giây/câu)")
+    print(f"✅ Đã hoàn thành suy luận trong {t_inference_duration:.2f} giây! (Trung bình: {t_inference_duration/len(test_data):.3f} giây/câu)")
 
-    # 6. Biểu quyết bầu chọn số đông và xuất file kết quả
-    os.makedirs("/output", exist_ok=True)
-    output_filepath = "/output/pred.csv"
+    # 5. Xuất các file kết quả
+    # Cấu trúc của BTC yêu cầu: submission.csv, submission_time.csv
+    # Chúng tôi sẽ ghi vào cả thư mục hiện tại (WORKDIR /code) và /output (nếu có để tương thích với test local)
     
-    with open(output_filepath, "w", newline="", encoding="utf-8") as f_out:
-        writer = csv.writer(f_out)
-        writer.writerow(["qid", "answer"])
-        
-        for q_idx, item in enumerate(test_data):
-            votes = votes_dict[q_idx]
-            # Biểu quyết lấy ý kiến số đông
-            vote_counts = Counter(votes)
-            selected_ans = vote_counts.most_common(1)[0][0]
+    output_files = ["submission.csv", "submission_time.csv"]
+    for out_f in output_files:
+        filepath = out_f
+        with open(filepath, "w", newline="", encoding="utf-8") as f_out:
+            writer = csv.writer(f_out)
+            if out_f == "submission.csv":
+                writer.writerow(["qid", "answer"])
+                for pred in predictions:
+                    writer.writerow([pred["qid"], pred["answer"]])
+            else:
+                writer.writerow(["qid", "answer", "time"])
+                for pred in predictions:
+                    writer.writerow([pred["qid"], pred["answer"], f"{pred['time']:.4f}"])
+        print(f"🎯 Đã xuất file kết quả: {filepath}")
+
+    # Đồng bộ sang thư mục /output để tương thích ngược với run_docker_test.sh của thí sinh
+    if os.path.exists("/output"):
+        try:
+            import shutil
+            shutil.copy("submission.csv", "/output/submission.csv")
+            shutil.copy("submission.csv", "/output/pred.csv")
+            shutil.copy("submission_time.csv", "/output/submission_time.csv")
+            print("🎯 Đã đồng bộ kết quả sang thư mục mount /output")
+        except Exception as e:
+            print(f"⚠️ Không thể đồng bộ kết quả sang /output: {e}")
             
-            writer.writerow([item["qid"], selected_ans])
-            
-    print(f"🎯 Đã xuất file kết quả thành công vào: {output_filepath}")
     print("====================================================================")
     print("🎉 CONTAINER HOÀN THÀNH NHIỆM VỤ!")
     print("====================================================================")

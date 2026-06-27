@@ -1,0 +1,14 @@
+.git
+.cache
+__pycache__
+*.ipynb
+*.pdf
+*.docx
+*.zip
+output_mock
+data_mock
+temp
+*.log
+vllm_server.log
+phuong_phap_toi_uu.md
+~$*
