@@ -1,0 +1,24 @@
+====================================================================
+THÔNG TIN NỘP BÀI - VIETNAMESE STUDENT HACKAITHON 2026
+BẢNG C - INNOVATOR (AI AGENT ĐA TÁC VỤ)
+====================================================================
+
+1. THÔNG TIN ĐỘI THI
+- Tên đội: T1S_KMML
+
+2. ĐƯỜNG DẪN MÃ NGUỒN (GITHUB REPOSITORY)
+- URL: https://github.com/khanhle1406/T1S_KMML-HackAIthon2026.git
+- Nhánh mặc định (Branch): main
+- Mô tả: Chứa Dockerfile, mã nguồn entrypoint giải đề và hướng dẫn tái lập kết quả.
+
+3. ĐƯỜNG DẪN DOCKER CONTAINER (DOCKER HUB)
+- URL Image: khanhle1406/t1s_kmml_innovator:latest
+- Mô tả: Image đã đóng gói sẵn mô hình Qwen3.5-4B-AWQ-4bit và chạy offline hoàn toàn.
+
+4. DANH SÁCH TỆP TIN ĐÍNH KÈM TRONG THƯ MỤC NÀY
+- T1S_KMML_Thuyet_minh_Innovator.docx: Báo cáo thuyết minh giải pháp gửi Ban Giám Khảo.
+- public_test_predictions.csv: Kết quả dự đoán trên 463 câu hỏi Public Test (độ chính xác đạt 88.98%).
+
+====================================================================
+TÀI LIỆU CUNG CẤP CÁC THÔNG TIN TRUY CẬP VÀ MÔ TẢ TỆP TIN DỰ THI.
+====================================================================
