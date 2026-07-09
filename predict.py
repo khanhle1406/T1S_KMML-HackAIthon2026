@@ -210,6 +210,10 @@ def main():
         print(f"📂 Tìm thấy file kiểm thử: {input_filepath}")
         test_data = load_test_data(input_filepath)
         print(f"📊 Đã nạp thành công {len(test_data)} câu hỏi từ file test.")
+        run_limit = os.environ.get("RUN_LIMIT")
+        if run_limit:
+            test_data = test_data[:int(run_limit)]
+            print(f"⚠️ Giới hạn số câu chạy thử nghiệm bằng RUN_LIMIT: {len(test_data)} câu.")
     except Exception as e:
         print(f"❌ Lỗi đọc dữ liệu đầu vào: {e}")
         # Ghi file rỗng hoặc lỗi và thoát
