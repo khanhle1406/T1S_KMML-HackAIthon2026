@@ -118,6 +118,58 @@ def extract_letter(text, choices_count):
                 
     return "A"
 
+def build_safe_prompt_step2(prompt, reasoning_text, max_model_len, tokenizer, max_gen_tokens=15):
+    """
+    Xây dựng prompt cho Bước 2 cực kỳ an toàn, chống tràn ngữ cảnh (context overflow)
+    bằng cách đảm bảo len(prompt_step2) + max_gen_tokens < max_model_len.
+    Trả về None nếu prompt chính quá dài không thể chứa nổi suffix + max_gen_tokens.
+    """
+    suffix = "\n\nChốt lại, đáp án đúng là chữ cái:"
+    reasoning_tokens = tokenizer.encode(reasoning_text)
+    
+    # Bắt đầu với số lượng tokens lý thuyết được phép dùng
+    prompt_tokens_len = len(tokenizer.encode(prompt))
+    suffix_tokens_len = len(tokenizer.encode(suffix))
+    
+    # Nếu bản thân prompt + suffix + max_gen_tokens đã vượt quá giới hạn -> Trả về None để skip
+    if prompt_tokens_len + suffix_tokens_len + max_gen_tokens + 5 >= max_model_len:
+        return None
+        
+    # Ngưỡng tối đa cho phép của reasoning là phần còn lại trừ đi phần sinh ra và sai số an toàn 15 tokens
+    max_allowed_reasoning_tokens = max_model_len - prompt_tokens_len - suffix_tokens_len - max_gen_tokens - 15
+    
+    if max_allowed_reasoning_tokens <= 10:
+        # Nếu prompt chính quá dài không còn chỗ cho reasoning, bỏ luôn reasoning
+        truncated_reasoning = ""
+    else:
+        # Cắt ngắn reasoning_tokens nếu vượt quá giới hạn
+        if len(reasoning_tokens) > max_allowed_reasoning_tokens:
+            reasoning_tokens = reasoning_tokens[-max_allowed_reasoning_tokens:]
+        truncated_reasoning = tokenizer.decode(reasoning_tokens)
+        
+    # Vòng lặp kiểm tra và cắt ngắn đệ quy để đảm bảo tuyệt đối không bị tràn token
+    # (Tránh trường hợp decode -> encode bị nở thêm token do biên từ)
+    safety_counter = 0
+    while safety_counter < 100:
+        prompt_step2 = prompt + f"{truncated_reasoning}{suffix}"
+        prompt_step2_tokens = len(tokenizer.encode(prompt_step2))
+        
+        if prompt_step2_tokens + max_gen_tokens < max_model_len:
+            return prompt_step2
+            
+        # Nếu vẫn bị tràn và reasoning đã trống -> Trả về None để tránh crash
+        if truncated_reasoning == "":
+            return None
+        reasoning_tokens = tokenizer.encode(truncated_reasoning)
+        if len(reasoning_tokens) <= 10:
+            truncated_reasoning = ""
+        else:
+            truncated_reasoning = tokenizer.decode(reasoning_tokens[:-10])
+        safety_counter += 1
+        
+    # Fallback cuối cùng
+    return None
+
 def find_input_file():
     """Tìm file kiểm thử đầu vào tại thư mục chỉ định, ưu tiên tuyệt đối /code/private_test.json."""
     # 1. Ưu tiên tuyệt đối file /code/private_test.json theo yêu cầu của BTC
@@ -364,29 +416,26 @@ def main():
                         reasoning_text = request_output.outputs[0].text
                         reasonings[0] = reasoning_text
                         
-                        # Chuẩn bị Bước 2: Sinh 1 token đáp án kèm logprobs để kiểm tra độ phân vân
-                        prompt_base = prompt + f"{reasoning_text}\n\nChốt lại, đáp án đúng là chữ cái:"
-                        prompt_base_tokens = len(tokenizer.encode(prompt_base))
-                        allowed_reasoning_tokens = max_model_len - prompt_base_tokens - 15
-                        
-                        if allowed_reasoning_tokens > 10:
-                            reasoning_tokens = tokenizer.encode(reasoning_text)
-                            truncated_reasoning = tokenizer.decode(reasoning_tokens[-allowed_reasoning_tokens:])
+                        # Chuẩn bị Bước 2: Sinh 1 token đáp án kèm logprobs để kiểm tra độ phân vân (dùng hàm build_safe_prompt_step2)
+                        prompt_step2 = build_safe_prompt_step2(prompt, reasoning_text, max_model_len, tokenizer, max_gen_tokens=1)
+                        if prompt_step2 is None:
+                            # Không thể chạy Step 2 do quá dài -> Trích xuất trực tiếp
+                            ans_extracted = extract_answer_from_completed(reasoning_text, choices_count)
+                            pred_letter = normalize_prediction(ans_extracted, item) if ans_extracted else "A"
+                            votes[0] = pred_letter
+                            margin_val = 0.50  # Bỏ qua voting, dừng sớm
+                            early_exited = True
                         else:
-                            truncated_reasoning = ""
-                            
-                        prompt_step2 = prompt + f"{truncated_reasoning}\n\nChốt lại, đáp án đúng là chữ cái:"
-                        
-                        engine.add_request(
-                            request_id=f"conf_{q_idx}",
-                            prompt=prompt_step2,
-                            params=SamplingParams(
-                                temperature=0.0,  # Greedy
-                                max_tokens=1,
-                                logprobs=5,
-                                output_kind=RequestOutputKind.FINAL_ONLY
+                            engine.add_request(
+                                request_id=f"conf_{q_idx}",
+                                prompt=prompt_step2,
+                                params=SamplingParams(
+                                    temperature=0.0,  # Greedy
+                                    max_tokens=1,
+                                    logprobs=5,
+                                    output_kind=RequestOutputKind.FINAL_ONLY
+                                )
                             )
-                        )
                         
                     # 2. Nhận kết quả kiểm tra độ tự tin từ logprobs
                     elif req_id == f"conf_{q_idx}":
@@ -452,31 +501,25 @@ def main():
                             ans = normalize_prediction(ans, item)
                             votes[path_idx] = ans
                         else:
-                            # Step 2 phụ cho luồng 1, 2
-                            prompt_base = prompt + f"{reasoning_text}\n\nChốt lại, đáp án đúng là chữ cái:"
-                            prompt_base_tokens = len(tokenizer.encode(prompt_base))
-                            allowed_reasoning_tokens = max_model_len - prompt_base_tokens - 15
-                            
-                            if allowed_reasoning_tokens > 10:
-                                reasoning_tokens = tokenizer.encode(reasoning_text)
-                                truncated_reasoning = tokenizer.decode(reasoning_tokens[-allowed_reasoning_tokens:])
+                            # Step 2 phụ cho luồng 1, 2 (dùng hàm build_safe_prompt_step2)
+                            prompt_step2 = build_safe_prompt_step2(prompt, reasoning_text, max_model_len, tokenizer, max_gen_tokens=15)
+                            if prompt_step2 is None:
+                                # Không thể chạy Step 2 do quá dài -> Trích xuất trực tiếp
+                                ans_extracted = extract_answer_from_completed(reasoning_text, choices_count)
+                                votes[path_idx] = normalize_prediction(ans_extracted, item) if ans_extracted else "A"
                             else:
-                                truncated_reasoning = ""
-                                
-                            prompt_step2 = prompt + f"{truncated_reasoning}\n\nChốt lại, đáp án đúng là chữ cái:"
-                            
-                            step2_req_id = f"s2_{q_idx}_{path_idx}"
-                            engine.add_request(
-                                request_id=step2_req_id,
-                                prompt=prompt_step2,
-                                params=SamplingParams(
-                                    temperature=0.0,
-                                    max_tokens=15,
-                                    repetition_penalty=1.10,
-                                    stop=["[DONE]"],
-                                    output_kind=RequestOutputKind.FINAL_ONLY
+                                step2_req_id = f"s2_{q_idx}_{path_idx}"
+                                engine.add_request(
+                                    request_id=step2_req_id,
+                                    prompt=prompt_step2,
+                                    params=SamplingParams(
+                                        temperature=0.0,
+                                        max_tokens=15,
+                                        repetition_penalty=1.10,
+                                        stop=["[DONE]"],
+                                        output_kind=RequestOutputKind.FINAL_ONLY
+                                    )
                                 )
-                            )
                             
                     # 4. Nhận kết quả Step 2 phụ cho Luồng 1 hoặc Luồng 2
                     elif req_id.startswith("s2_"):
