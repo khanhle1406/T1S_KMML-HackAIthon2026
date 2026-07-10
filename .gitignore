@@ -35,7 +35,7 @@ rag_archive/
 scratch/
 # Submission folder
 NOP_BAI_T1S_KMML.zip
-NOP_BAI_T1S_KMML/*.pdf
+NOP_BAI_T1S_KMML/
 
 # Draft markdown report
 phuong_phap_toi_uu.md
